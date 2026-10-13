@@ -1,0 +1,59 @@
+name: GitHub Classroom Workflow
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalace závislostí
+        run: pip install -r requirements.txt
+
+      - name: Úkol 1 - základní testy
+        id: ukol-1-zaklad
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 'Úkol 1 - základní testy'
+          command: pytest cviceni/test_ukol_1.py -q
+          timeout: 10
+          max-score: 10
+
+      - name: Úkol 2 - základní testy
+        id: ukol-2-zaklad
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 'Úkol 2 - základní testy'
+          command: pytest cviceni/test_ukol_2.py -q
+          timeout: 10
+          max-score: 10
+
+      - name: Úkol 3 - základní testy
+        id: ukol-3-zaklad
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 'Úkol 3 - základní testy'
+          command: pytest cviceni/test_ukol_3.py -q
+          timeout: 10
+          max-score: 10
+
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          UKOL-1-ZAKLAD_RESULTS: "${{steps.ukol-1-zaklad.outputs.result}}"
+          UKOL-2-ZAKLAD_RESULTS: "${{steps.ukol-2-zaklad.outputs.result}}"
+          UKOL-3-ZAKLAD_RESULTS: "${{steps.ukol-3-zaklad.outputs.result}}"
+        with:
+          runners: ukol-1-zaklad,ukol-2-zaklad,ukol-3-zaklad
